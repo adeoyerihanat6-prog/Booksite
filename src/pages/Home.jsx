@@ -1,3 +1,4 @@
+import EditorsPicks from "../components/EditorsPicks";
 import Hero from "../components/Hero";
 import MoodLibrary from "../components/MoodLibrary";
 
@@ -6,6 +7,7 @@ function Home() {
     <>
       <Hero />
       <MoodLibrary />
+      <EditorsPicks/>
     </>
   );
 }
