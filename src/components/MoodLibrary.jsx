@@ -1,261 +1,214 @@
-import { ArrowUpRight } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
-import { useState } from "react";
-
-import quietBetweenStars from "../assets/books/quiet-between-stars.png";
-import thingsWeNeverSaid from "../assets/books/things-we-never-said.png";
-import mapOfSomewhere from "../assets/books/map-of-somewhere.png";
-import lastSunday from "../assets/books/last-sunday.png";
-import lettersToTheMoon from "../assets/books/letters-to-the-moon.png";
+import {
+  ArrowUpRight,
+  Compass,
+  Heart,
+  Moon,
+  Sparkles,
+  Wind,
+} from "lucide-react";
+import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
 
 const moods = [
   {
-    id: 1,
-    title: "Something soft",
-    book: "Letters to the Moon",
-    genre: "Poetry & Epistolary",
-    cover: lettersToTheMoon,
+    id: "dreamy",
+    title: "Dreamy & Ethereal",
+    description: "For when you want to disappear somewhere beautiful.",
+    icon: Moon,
   },
   {
-    id: 2,
-    title: "Something strange",
-    book: "A Map of Somewhere",
-    genre: "Magical Realism",
-    cover: mapOfSomewhere,
+    id: "strange",
+    title: "Strange & Wonderful",
+    description: "For stories that make the impossible feel ordinary.",
+    icon: Sparkles,
   },
   {
-    id: 3,
-    title: "Something hopeful",
-    book: "Quiet Between Stars",
-    genre: "Cosmic Sci-Fi",
-    cover: quietBetweenStars,
+    id: "hopeful",
+    title: "Quietly Hopeful",
+    description: "For when you need a little light in the distance.",
+    icon: Wind,
   },
   {
-    id: 4,
-    title: "Something bittersweet",
-    book: "Things We Never Said",
-    genre: "Contemporary Romance",
-    cover: thingsWeNeverSaid,
+    id: "emotional",
+    title: "Deeply Human",
+    description: "For stories that stay with you long after the last page.",
+    icon: Heart,
   },
   {
-    id: 5,
-    title: "Something that stays with you",
-    book: "The Last Sunday",
-    genre: "Historical Fiction",
-    cover: lastSunday,
+    id: "nostalgic",
+    title: "Nostalgic & Tender",
+    description: "For memories, old places, and things worth carrying home.",
+    icon: Compass,
   },
 ];
 
 function MoodLibrary() {
-  const [activeMood, setActiveMood] = useState(moods[0]);
-
   return (
-    <section className="relative min-h-screen bg-[var(--background)] px-6 py-32 text-[var(--foreground)] sm:px-10 sm:py-40">
-      <div className="mx-auto max-w-6xl">
-
+    <section
+      id="moods"
+      className="relative overflow-hidden bg-[var(--background)] px-6 py-32 text-[var(--foreground)] sm:px-10 sm:py-40"
+    >
+      <div className="mx-auto max-w-7xl">
         {/* HEADER */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.3 }}
+          transition={{
+            duration: 0.8,
+            ease: [0.22, 1, 0.36, 1],
+          }}
+          className="max-w-2xl"
+        >
+          <div className="flex items-center gap-3">
+            <span className="h-px w-10 bg-[var(--foreground)]/30" />
 
-        <div className="mb-20 flex flex-col gap-5 sm:mb-28">
-          <span className="text-[10px] font-medium uppercase tracking-[0.35em] text-[var(--muted)]">
-            02 — Mood Library
-          </span>
+            <span className="text-[10px] font-medium uppercase tracking-[0.3em] text-[var(--muted)]">
+              Find your next story
+            </span>
+          </div>
 
-          <h2 className="max-w-3xl text-4xl font-light leading-[0.95] tracking-[-0.04em] sm:text-6xl md:text-7xl">
-            What are you{" "}
-            <span className="italic">in the mood for?</span>
+          <h2 className="mt-7 text-5xl font-light leading-[0.94] tracking-[-0.045em] sm:text-6xl md:text-7xl">
+            Read by
+            <br />
+            <span className="italic">feeling.</span>
           </h2>
 
-          <p className="max-w-md text-sm font-light leading-relaxed text-[var(--muted)] sm:text-base">
-            Sometimes you don't need a genre. You just need a feeling.
+          <p className="mt-7 max-w-md text-sm font-light leading-relaxed text-[var(--muted)] sm:text-base">
+            You don't always know what genre you want. Sometimes you just
+            know how you want a story to make you feel.
           </p>
-        </div>
+        </motion.div>
 
-        {/* MOOD AREA */}
-
-        <div className="grid gap-16 md:grid-cols-[1fr_360px] md:items-center lg:grid-cols-[1fr_420px] lg:gap-24">
-
+        {/* MOOD DISCOVERY */}
+        <div className="mt-20 grid gap-16 lg:mt-28 lg:grid-cols-[1fr_0.8fr] lg:gap-24">
           {/* MOOD LIST */}
-
           <div className="border-t border-[var(--foreground)]/10">
-            {moods.map((mood) => {
-              const isActive = activeMood.id === mood.id;
+            {moods.map((mood, index) => {
+              const Icon = mood.icon;
 
               return (
-                <div key={mood.id}>
-
-                  <motion.button
-                    onMouseEnter={() => setActiveMood(mood)}
-                    onFocus={() => setActiveMood(mood)}
-                    onClick={() => setActiveMood(mood)}
-                    className="group flex w-full items-center justify-between border-b border-[var(--foreground)]/10 py-7 text-left sm:py-9"
+                <motion.div
+                  key={mood.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, amount: 0.2 }}
+                  transition={{
+                    duration: 0.6,
+                    delay: index * 0.07,
+                    ease: [0.22, 1, 0.36, 1],
+                  }}
+                >
+                  <Link
+                    to={`/mood/${mood.id}`}
+                    className="group flex w-full items-center justify-between border-b border-[var(--foreground)]/10 py-7 text-left transition-transform duration-300 hover:translate-x-2 sm:py-8"
                   >
-                    <div className="flex items-center gap-5 sm:gap-8">
-                      <span className="text-[9px] tracking-[0.2em] text-[var(--muted)]">
-                        {String(mood.id).padStart(2, "0")}
-                      </span>
+                    {/* LEFT CONTENT */}
+                    <div className="flex items-center gap-5 sm:gap-7">
+                      {/* ICON */}
+                      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-[var(--foreground)]/10 transition-all duration-300 group-hover:border-[var(--foreground)]/30 group-hover:bg-[var(--foreground)]/[0.06]">
+                        <Icon
+                          size={17}
+                          strokeWidth={1.3}
+                          className="text-[var(--foreground)]/50 transition-all duration-300 group-hover:rotate-6 group-hover:text-[var(--foreground)]"
+                        />
+                      </div>
 
-                      <motion.span
-                        animate={{
-                          x: isActive ? 8 : 0,
-                        }}
-                        transition={{
-                          duration: 0.3,
-                          ease: "easeOut",
-                        }}
-                        className={`text-2xl font-light tracking-[-0.02em] transition-opacity duration-300 sm:text-4xl ${
-                          isActive
-                            ? "opacity-100"
-                            : "opacity-45 group-hover:opacity-80"
-                        }`}
-                      >
-                        {mood.title}
-                      </motion.span>
+                      {/* TEXT */}
+                      <div>
+                        <h3 className="text-xl font-light tracking-[-0.02em] text-[var(--foreground)]/75 transition-colors duration-300 group-hover:text-[var(--foreground)] sm:text-3xl">
+                          {mood.title}
+                        </h3>
+
+                        <p className="mt-1 text-xs font-light text-[var(--muted)] sm:text-sm">
+                          {mood.description}
+                        </p>
+                      </div>
                     </div>
 
-                    <motion.div
-                      animate={{
-                        opacity: isActive ? 1 : 0.35,
-                        x: isActive ? 0 : -4,
-                      }}
-                      transition={{ duration: 0.25 }}
-                    >
+                    {/* ARROW */}
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[var(--foreground)]/10 opacity-40 transition-all duration-300 group-hover:-translate-y-1 group-hover:translate-x-1 group-hover:border-[var(--foreground)]/30 group-hover:opacity-100">
                       <ArrowUpRight
-                        size={18}
+                        size={16}
                         strokeWidth={1.3}
                       />
-                    </motion.div>
-                  </motion.button>
-
-                  {/* MOBILE BOOK PREVIEW */}
-
-                  <AnimatePresence initial={false}>
-                    {isActive && (
-                      <motion.div
-                        initial={{
-                          height: 0,
-                          opacity: 0,
-                        }}
-                        animate={{
-                          height: "auto",
-                          opacity: 1,
-                        }}
-                        exit={{
-                          height: 0,
-                          opacity: 0,
-                        }}
-                        transition={{
-                          duration: 0.4,
-                          ease: [0.22, 1, 0.36, 1],
-                        }}
-                        className="overflow-hidden md:hidden"
-                      >
-                        <div className="flex items-center gap-6 py-8 pl-8">
-
-                          <motion.img
-                            initial={{
-                              opacity: 0,
-                              x: -15,
-                            }}
-                            animate={{
-                              opacity: 1,
-                              x: 0,
-                            }}
-                            transition={{
-                              duration: 0.4,
-                              delay: 0.05,
-                            }}
-                            src={mood.cover}
-                            alt={mood.book}
-                            draggable={false}
-                            className="h-40 w-auto shrink-0 object-cover shadow-[0_20px_40px_rgba(0,0,0,0.18)]"
-                          />
-
-                          <div>
-                            <p className="text-sm font-normal">
-                              {mood.book}
-                            </p>
-
-                            <p className="mt-2 text-[10px] uppercase tracking-[0.2em] text-[var(--muted)]">
-                              {mood.genre}
-                            </p>
-
-                            <button className="mt-5 inline-flex items-center gap-2 text-[9px] font-medium uppercase tracking-[0.25em]">
-                              View book
-                              <ArrowUpRight
-                                size={12}
-                                strokeWidth={1.3}
-                              />
-                            </button>
-                          </div>
-
-                        </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
+                    </div>
+                  </Link>
+                </motion.div>
               );
             })}
           </div>
 
-          {/* DESKTOP BOOK PREVIEW */}
-
-          <div className="relative hidden md:block">
-            <div className="relative flex aspect-[3/4] items-center justify-center overflow-hidden">
-
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={activeMood.id}
-                  initial={{
-                    opacity: 0,
-                    y: 25,
-                    rotate: 2,
-                  }}
-                  animate={{
-                    opacity: 1,
-                    y: 0,
-                    rotate: -1,
-                  }}
-                  exit={{
-                    opacity: 0,
-                    y: -25,
-                    rotate: -2,
-                  }}
-                  transition={{
-                    duration: 0.45,
-                    ease: [0.22, 1, 0.36, 1],
-                  }}
-                  className="absolute flex flex-col items-center"
-                >
-                  <img
-                    src={activeMood.cover}
-                    alt={activeMood.book}
-                    draggable={false}
-                    className="h-[360px] w-auto select-none object-cover shadow-[0_30px_60px_rgba(0,0,0,0.2)] lg:h-[420px]"
-                  />
-
-                  <p className="mt-6 text-center text-[10px] uppercase tracking-[0.25em] text-[var(--muted)]">
-                    {activeMood.book}
-                  </p>
-
-                  <p className="mt-2 text-[9px] uppercase tracking-[0.2em] text-[var(--muted)]/70">
-                    {activeMood.genre}
-                  </p>
-
-                  <button className="mt-5 inline-flex items-center gap-2 text-[9px] font-medium uppercase tracking-[0.3em]">
-                    View book
-                    <ArrowUpRight
-                      size={12}
-                      strokeWidth={1.3}
-                    />
-                  </button>
-                </motion.div>
-              </AnimatePresence>
-
+          {/* EDITORIAL MESSAGE */}
+          <motion.div
+            initial={{ opacity: 0, x: 30 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true, amount: 0.3 }}
+            transition={{
+              duration: 0.8,
+              delay: 0.15,
+              ease: [0.22, 1, 0.36, 1],
+            }}
+            className="relative hidden min-h-[500px] items-center justify-center overflow-hidden rounded-[2rem] border border-[var(--foreground)]/10 bg-[var(--foreground)]/[0.025] lg:flex"
+          >
+            {/* BACKGROUND TYPOGRAPHY */}
+            <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+              <span className="select-none text-[13rem] font-light leading-none tracking-[-0.09em] text-[var(--foreground)]/[0.025]">
+                FEEL
+              </span>
             </div>
-          </div>
 
+            {/* DECORATIVE CIRCLES */}
+            <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full border border-[var(--foreground)]/[0.06]" />
+
+            <div className="absolute -bottom-24 -left-20 h-72 w-72 rounded-full border border-[var(--foreground)]/[0.05]" />
+
+            {/* MESSAGE */}
+            <div className="relative z-10 max-w-xs text-center">
+              <Sparkles
+                size={22}
+                strokeWidth={1.2}
+                className="mx-auto mb-7 text-[var(--foreground)]/50"
+              />
+
+              <p className="text-3xl font-light leading-tight tracking-[-0.03em]">
+                Start with a feeling.
+                <br />
+                <span className="italic text-[var(--muted)]">
+                  We'll find the story.
+                </span>
+              </p>
+
+              <p className="mt-6 text-xs font-light leading-relaxed text-[var(--muted)]">
+                Explore stories gathered around moods, atmospheres, and the
+                little feelings that make us reach for a book.
+              </p>
+            </div>
+          </motion.div>
         </div>
+
+        {/* MOBILE EDITORIAL NOTE */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.7 }}
+          className="mt-20 flex items-center gap-4 border-t border-[var(--foreground)]/10 pt-8 lg:hidden"
+        >
+          <Sparkles
+            size={18}
+            strokeWidth={1.2}
+            className="shrink-0 text-[var(--foreground)]/50"
+          />
+
+          <p className="text-sm font-light leading-relaxed text-[var(--muted)]">
+            Start with a feeling. We'll find the story.
+          </p>
+        </motion.div>
       </div>
+
+      {/* AMBIENT TEXTURE */}
+      <div className="pointer-events-none absolute -bottom-40 left-1/2 h-[500px] w-[500px] -translate-x-1/2 rounded-full bg-[var(--foreground)]/[0.025] blur-[120px]" />
     </section>
   );
 }
