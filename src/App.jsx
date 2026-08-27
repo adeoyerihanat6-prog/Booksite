@@ -1,6 +1,7 @@
 import { useState } from "react";
 import Navbar from "./components/Navbar";
-import Hero from "./components/Hero";
+import Home from "./pages/Home";
+
 
 function App() {
   const [theme, setTheme] = useState("dark");
@@ -9,7 +10,7 @@ function App() {
    <div className={theme === "light" ? "light" : ""}
   style={{ minHeight: "100vh",  background: "var(--background)", color: "var(--foreground)",}}>
       <Navbar  theme={theme} setTheme={setTheme}/>
-      <Hero/>
+     <Home/>
     </div>
   );
 }
