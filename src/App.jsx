@@ -14,6 +14,8 @@ import MoodResults from "./pages/MoodResults";
 import BookDetails from "./pages/BookDetails";
 
 import Reader from "./pages/Reader";
+import Genres from "./pages/Genres";
+import About from "./pages/About";
 
 
 function App() {
@@ -58,11 +60,7 @@ function App() {
         <Route
           path="/genres"
           element={
-            <div className="px-6 py-32">
-              <h1 className="text-5xl font-light">
-                Genres
-              </h1>
-            </div>
+            <Genres/>
           }
         />
 
@@ -71,11 +69,7 @@ function App() {
         <Route
           path="/about"
           element={
-            <div className="px-6 py-32">
-              <h1 className="text-5xl font-light">
-                About
-              </h1>
-            </div>
+           <About/>
           }
         />
 
