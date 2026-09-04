@@ -3,7 +3,6 @@ import {
   ArrowRight,
   Bookmark,
   Check,
-  ChevronDown,
   List,
   Minus,
   Plus,
@@ -29,82 +28,98 @@ import {
 
 import { books } from "../data/books";
 import { bookContent } from "../data/bookContent";
+import useReadingProgress from "../hooks/useReadingProgress";
 
 function Reader() {
   const { id } = useParams();
 
-  const book = books.find((book) => book.id === id);
+  const book = books.find(
+    (book) => book.id === id
+  );
+
   const content = bookContent[id];
 
-  const [chapterIndex, setChapterIndex] = useState(0);
-  const [menuOpen, setMenuOpen] = useState(false);
-  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [chapterIndex, setChapterIndex] =
+    useState(0);
+
+  const [menuOpen, setMenuOpen] =
+    useState(false);
+
+  const [settingsOpen, setSettingsOpen] =
+    useState(false);
+
   const [saved, setSaved] = useState(false);
+
   const [progress, setProgress] = useState(0);
 
   const [fontSize, setFontSize] = useState(() => {
     const settings = JSON.parse(
-      localStorage.getItem("readerSettings") || "{}"
+      localStorage.getItem("readerSettings") ||
+        "{}"
     );
 
     return settings.fontSize || 18;
   });
 
-  const [readingWidth, setReadingWidth] = useState(() => {
-    const settings = JSON.parse(
-      localStorage.getItem("readerSettings") || "{}"
-    );
+  const [readingWidth, setReadingWidth] =
+    useState(() => {
+      const settings = JSON.parse(
+        localStorage.getItem("readerSettings") ||
+          "{}"
+      );
 
-    return settings.readingWidth || "medium";
-  });
+      return settings.readingWidth || "medium";
+    });
 
-  const [lineHeight, setLineHeight] = useState(() => {
-    const settings = JSON.parse(
-      localStorage.getItem("readerSettings") || "{}"
-    );
+  const [lineHeight, setLineHeight] = useState(
+    () => {
+      const settings = JSON.parse(
+        localStorage.getItem("readerSettings") ||
+          "{}"
+      );
 
-    return settings.lineHeight || 2;
-  });
+      return settings.lineHeight || 2;
+    }
+  );
 
-  const chapter = content?.chapters[chapterIndex];
+  const {
+    progress: savedProgress,
+    chapterIndex: savedChapterIndex,
+    chapterProgress,
+    completedChapters,
+    getBookProgress,
+    saveProgress,
+  } = useReadingProgress(id);
+
+  const chapter =
+    content?.chapters[chapterIndex];
 
   /* -----------------------------
      RESTORE READING PROGRESS
   ----------------------------- */
 
   useEffect(() => {
-    if (!id) return;
+    if (!savedProgress) return;
 
-    const savedProgress = JSON.parse(
-      localStorage.getItem("readingProgress") || "{}"
-    );
+    setChapterIndex(savedChapterIndex);
 
-    const bookProgress = savedProgress[id];
-
-    if (bookProgress) {
-      setChapterIndex(bookProgress.chapterIndex || 0);
-
-      requestAnimationFrame(() => {
-        window.scrollTo({
-          top: bookProgress.scrollPosition || 0,
-          behavior: "instant",
-        });
+    requestAnimationFrame(() => {
+      window.scrollTo({
+        top: savedProgress.scrollPosition || 0,
+        behavior: "instant",
       });
-    }
-
-    const savedBooks = JSON.parse(
-      localStorage.getItem("savedBooks") || "[]"
-    );
-
-    setSaved(savedBooks.includes(id));
-  }, [id]);
+    });
+  }, [
+    savedProgress,
+    savedChapterIndex,
+  ]);
 
   /* -----------------------------
-     SAVE READING POSITION
+     TRACK READING POSITION
   ----------------------------- */
 
   useEffect(() => {
-    if (!id) return;
+    if (!id || !content) return;
 
     const handleScroll = () => {
       const scrollTop = window.scrollY;
@@ -113,47 +128,44 @@ function Reader() {
         document.documentElement.scrollHeight -
         window.innerHeight;
 
-      const chapterProgress =
+      const currentChapterProgress =
         documentHeight > 0
           ? (scrollTop / documentHeight) * 100
           : 0;
 
       const safeChapterProgress = Math.min(
         100,
-        Math.max(0, chapterProgress)
+        Math.max(0, currentChapterProgress)
       );
 
-      const totalChapters = content?.chapters?.length || 1;
-
       const bookProgress =
-        ((chapterIndex + safeChapterProgress / 100) /
-          totalChapters) *
+        ((chapterIndex +
+          safeChapterProgress / 100) /
+          content.chapters.length) *
         100;
 
       setProgress(
-        Math.min(100, Math.max(0, bookProgress))
+        Math.min(
+          100,
+          Math.max(0, bookProgress)
+        )
       );
 
-      const savedProgress = JSON.parse(
-        localStorage.getItem("readingProgress") || "{}"
-      );
-
-      savedProgress[id] = {
+      saveProgress({
         chapterIndex,
         scrollPosition: scrollTop,
-        chapterProgress: safeChapterProgress,
-        updatedAt: Date.now(),
-      };
-
-      localStorage.setItem(
-        "readingProgress",
-        JSON.stringify(savedProgress)
-      );
+        chapterProgress:
+          safeChapterProgress,
+      });
     };
 
-    window.addEventListener("scroll", handleScroll, {
-      passive: true,
-    });
+    window.addEventListener(
+      "scroll",
+      handleScroll,
+      {
+        passive: true,
+      }
+    );
 
     handleScroll();
 
@@ -163,7 +175,12 @@ function Reader() {
         handleScroll
       );
     };
-  }, [chapterIndex, id, content]);
+  }, [
+    chapterIndex,
+    id,
+    content,
+    saveProgress,
+  ]);
 
   /* -----------------------------
      SAVE READER SETTINGS
@@ -178,7 +195,26 @@ function Reader() {
         lineHeight,
       })
     );
-  }, [fontSize, readingWidth, lineHeight]);
+  }, [
+    fontSize,
+    readingWidth,
+    lineHeight,
+  ]);
+
+  /* -----------------------------
+     LOAD SAVED BOOK STATUS
+  ----------------------------- */
+
+  useEffect(() => {
+    if (!id) return;
+
+    const savedBooks = JSON.parse(
+      localStorage.getItem("savedBooks") ||
+        "[]"
+    );
+
+    setSaved(savedBooks.includes(id));
+  }, [id]);
 
   /* -----------------------------
      SAVE BOOK
@@ -186,13 +222,15 @@ function Reader() {
 
   const handleSave = () => {
     const savedBooks = JSON.parse(
-      localStorage.getItem("savedBooks") || "[]"
+      localStorage.getItem("savedBooks") ||
+        "[]"
     );
 
     if (saved) {
-      const updatedBooks = savedBooks.filter(
-        (bookId) => bookId !== id
-      );
+      const updatedBooks =
+        savedBooks.filter(
+          (bookId) => bookId !== id
+        );
 
       localStorage.setItem(
         "savedBooks",
@@ -252,46 +290,48 @@ function Reader() {
      CHAPTER COMPLETION
   ----------------------------- */
 
-  const getCompletedChapters = () => {
-    const savedProgress = JSON.parse(
-      localStorage.getItem("readingProgress") || "{}"
-    );
-
-    return savedProgress[id]?.completedChapters || [];
-  };
-
-  const completedChapters = getCompletedChapters();
-
   const isChapterCompleted = (index) => {
     return completedChapters.includes(index);
   };
 
   const markChapterComplete = () => {
-    const savedProgress = JSON.parse(
-      localStorage.getItem("readingProgress") || "{}"
-    );
-
-    const currentCompleted =
-      savedProgress[id]?.completedChapters || [];
-
-    if (!currentCompleted.includes(chapterIndex)) {
-      savedProgress[id] = {
-        ...(savedProgress[id] || {}),
-        chapterIndex,
-        scrollPosition: window.scrollY,
-        completedChapters: [
-          ...currentCompleted,
-          chapterIndex,
-        ],
-        updatedAt: Date.now(),
-      };
-
-      localStorage.setItem(
-        "readingProgress",
-        JSON.stringify(savedProgress)
-      );
+    if (
+      isChapterCompleted(chapterIndex)
+    ) {
+      return;
     }
+
+    saveProgress({
+      chapterIndex,
+      scrollPosition: window.scrollY,
+      chapterProgress: 100,
+      completedChapters: [
+        ...completedChapters,
+        chapterIndex,
+      ],
+    });
   };
+
+  /* -----------------------------
+     BOOK PROGRESS
+  ----------------------------- */
+
+  useEffect(() => {
+    if (!content) return;
+
+    const calculatedProgress =
+      getBookProgress(
+        content.chapters.length
+      );
+
+    setProgress(calculatedProgress);
+  }, [
+    chapterProgress,
+    completedChapters,
+    chapterIndex,
+    content,
+    getBookProgress,
+  ]);
 
   /* -----------------------------
      PROGRESS LABEL
@@ -307,8 +347,13 @@ function Reader() {
       return "Final chapter";
     }
 
-    return `Chapter ${chapterIndex + 1} of ${content.chapters.length}`;
-  }, [chapterIndex, content]);
+    return `Chapter ${
+      chapterIndex + 1
+    } of ${content.chapters.length}`;
+  }, [
+    chapterIndex,
+    content,
+  ]);
 
   /* -----------------------------
      READING WIDTH
@@ -373,8 +418,6 @@ function Reader() {
 
       <header className="sticky top-0 z-40 border-b border-[var(--foreground)]/[0.08] bg-[var(--background)]/90 backdrop-blur-xl">
         <div className="mx-auto flex h-20 max-w-5xl items-center justify-between px-6 sm:px-10">
-          {/* EXIT */}
-
           <Link
             to={`/book/${book.id}`}
             className="group flex items-center gap-3 text-[9px] font-medium uppercase tracking-[0.25em] text-[var(--muted)] transition-colors hover:text-[var(--foreground)]"
@@ -390,8 +433,6 @@ function Reader() {
             </span>
           </Link>
 
-          {/* BOOK */}
-
           <div className="hidden text-center sm:block">
             <p className="text-[8px] uppercase tracking-[0.3em] text-[var(--muted)]">
               {book.title}
@@ -402,11 +443,7 @@ function Reader() {
             </p>
           </div>
 
-          {/* ACTIONS */}
-
           <div className="flex items-center gap-1">
-            {/* SAVE */}
-
             <button
               type="button"
               onClick={handleSave}
@@ -430,8 +467,6 @@ function Reader() {
               )}
             </button>
 
-            {/* SETTINGS */}
-
             <button
               type="button"
               onClick={() =>
@@ -446,11 +481,11 @@ function Reader() {
               />
             </button>
 
-            {/* CHAPTERS */}
-
             <button
               type="button"
-              onClick={() => setMenuOpen(true)}
+              onClick={() =>
+                setMenuOpen(true)
+              }
               aria-label="Open chapters"
               className="flex h-9 w-9 items-center justify-center text-[var(--muted)] transition-colors hover:text-[var(--foreground)]"
             >
@@ -489,8 +524,6 @@ function Reader() {
             }}
             className={`mx-auto w-full ${widthClasses[readingWidth]}`}
           >
-            {/* CHAPTER INTRO */}
-
             <div className="mb-16 sm:mb-20">
               <p className="text-[9px] uppercase tracking-[0.3em] text-[var(--muted)]">
                 Chapter{" "}
@@ -506,8 +539,6 @@ function Reader() {
 
               <div className="mt-8 h-px w-12 bg-[var(--foreground)]/20" />
             </div>
-
-            {/* STORY */}
 
             <div
               className="space-y-7"
@@ -556,38 +587,27 @@ function Reader() {
               )}
             </div>
 
-            {/* COMPLETE CHAPTER */}
-
             <div className="mt-20 border-t border-[var(--foreground)]/[0.08] pt-8">
               <button
                 type="button"
-                onClick={markChapterComplete}
+                onClick={
+                  markChapterComplete
+                }
                 disabled={isChapterCompleted(
                   chapterIndex
                 )}
                 className="group inline-flex items-center gap-3 text-[9px] uppercase tracking-[0.25em] text-[var(--muted)] transition-colors hover:text-[var(--foreground)] disabled:pointer-events-none"
               >
+                <Check
+                  size={14}
+                  strokeWidth={1.3}
+                />
+
                 {isChapterCompleted(
                   chapterIndex
-                ) ? (
-                  <>
-                    <Check
-                      size={14}
-                      strokeWidth={1.3}
-                    />
-
-                    Chapter completed
-                  </>
-                ) : (
-                  <>
-                    <Check
-                      size={14}
-                      strokeWidth={1.3}
-                    />
-
-                    Mark chapter complete
-                  </>
-                )}
+                )
+                  ? "Chapter completed"
+                  : "Mark chapter complete"}
               </button>
             </div>
           </motion.article>
@@ -599,7 +619,9 @@ function Reader() {
       ----------------------------- */}
 
       <section className="border-t border-[var(--foreground)]/[0.08] px-6 py-12 sm:px-10 sm:py-16">
-        <div className={`mx-auto ${widthClasses[readingWidth]}`}>
+        <div
+          className={`mx-auto ${widthClasses[readingWidth]}`}
+        >
           <div className="flex items-center justify-between gap-6">
             <button
               type="button"
@@ -620,7 +642,9 @@ function Reader() {
 
             <button
               type="button"
-              onClick={() => setMenuOpen(true)}
+              onClick={() =>
+                setMenuOpen(true)
+              }
               className="text-[9px] uppercase tracking-[0.25em] text-[var(--muted)] transition-colors hover:text-[var(--foreground)]"
             >
               {chapterIndex + 1} /{" "}
@@ -682,8 +706,8 @@ function Reader() {
             </h2>
 
             <p className="mx-auto mt-5 max-w-md text-sm font-light leading-relaxed text-[var(--muted)]">
-              Some stories end on the page. Others stay
-              with us a little longer.
+              Some stories end on the page. Others
+              stay with us a little longer.
             </p>
 
             <Link
@@ -708,8 +732,6 @@ function Reader() {
       <AnimatePresence>
         {menuOpen && (
           <>
-            {/* BACKDROP */}
-
             <motion.button
               type="button"
               aria-label="Close chapters"
@@ -722,11 +744,11 @@ function Reader() {
               exit={{
                 opacity: 0,
               }}
-              onClick={() => setMenuOpen(false)}
+              onClick={() =>
+                setMenuOpen(false)
+              }
               className="fixed inset-0 z-50 cursor-default bg-black/20 backdrop-blur-sm"
             />
-
-            {/* DRAWER */}
 
             <motion.aside
               initial={{
@@ -787,10 +809,9 @@ function Reader() {
                         }`}
                       >
                         <span className="pt-1 text-[9px]">
-                          {String(item.id).padStart(
-                            2,
-                            "0"
-                          )}
+                          {String(
+                            item.id
+                          ).padStart(2, "0")}
                         </span>
 
                         <span className="flex-1 text-sm font-light">
@@ -822,13 +843,16 @@ function Reader() {
               <div className="border-t border-[var(--foreground)]/10 px-6 py-6">
                 <div className="flex items-center justify-between">
                   <p className="text-[9px] leading-relaxed text-[var(--muted)]">
-                    {Math.round(progress)}% of the
-                    book
+                    {Math.round(
+                      progress
+                    )}
+                    % of the book
                   </p>
 
                   <p className="text-[9px] uppercase tracking-[0.2em] text-[var(--muted)]">
                     {completedChapters.length}/
-                    {content.chapters.length} complete
+                    {content.chapters.length}{" "}
+                    complete
                   </p>
                 </div>
 
@@ -853,8 +877,6 @@ function Reader() {
       <AnimatePresence>
         {settingsOpen && (
           <>
-            {/* BACKDROP */}
-
             <motion.button
               type="button"
               aria-label="Close reading settings"
@@ -872,8 +894,6 @@ function Reader() {
               }
               className="fixed inset-0 z-50 cursor-default bg-black/20 backdrop-blur-sm"
             />
-
-            {/* SETTINGS PANEL */}
 
             <motion.aside
               initial={{
@@ -1098,8 +1118,8 @@ function Reader() {
                     }}
                   >
                     <p className="font-light text-[var(--foreground)]/80">
-                      Every story deserves a quiet place
-                      to be read.
+                      Every story deserves a quiet
+                      place to be read.
                     </p>
                   </div>
                 </div>
