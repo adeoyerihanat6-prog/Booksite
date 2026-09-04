@@ -281,7 +281,7 @@ Possible future improvements include:
 
 ## Author
 
-Built by **Rihannah**.
+Built by **Adeoye Rihanat**.
 
 Full-stack web developer learning, building, breaking things, and figuring them out along the way.
 
