@@ -11,6 +11,7 @@ import Reader from "./pages/Reader";
 import Genres from "./pages/Genres";
 import GenreResults from "./pages/GenreResults";
 import About from "./pages/About";
+import SavedBooks from "./pages/SavedBooks";
 
 function App() {
   const [theme, setTheme] = useState("dark");
@@ -38,7 +39,7 @@ function App() {
           element={<Home />}
         />
 
-        {/* Genres */}
+        {/* Genres / Library */}
         <Route
           path="/genres"
           element={<Genres />}
@@ -47,6 +48,12 @@ function App() {
         <Route
           path="/genres/:genreName"
           element={<GenreResults />}
+        />
+
+        {/* Saved Books */}
+        <Route
+          path="/saved"
+          element={<SavedBooks />}
         />
 
         {/* About */}
