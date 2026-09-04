@@ -5,6 +5,7 @@ import EditorsPicks from "../components/EditorsPicks";
 import Hero from "../components/Hero";
 import MoodLibrary from "../components/MoodLibrary";
 import ContinueReading from "../components/ContinueReading";
+import Footer from "../components/Footer";
 
 function Home() {
   const location = useLocation();
@@ -28,6 +29,7 @@ function Home() {
       <MoodLibrary />
       <ContinueReading/>
       <EditorsPicks />
+      <Footer/>
     </>
   );
 }
