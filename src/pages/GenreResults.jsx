@@ -16,7 +16,7 @@ function GenreResults() {
       <section className="px-6 pb-20 pt-32 sm:px-10 sm:pb-28 sm:pt-40">
         <div className="mx-auto max-w-6xl">
           <Link
-            to="/genre"
+            to="/genres"
             className="group inline-flex items-center gap-2 text-[10px] font-medium uppercase tracking-[0.25em] text-[var(--muted)] transition-colors hover:text-[var(--foreground)]"
           >
             <ArrowLeft

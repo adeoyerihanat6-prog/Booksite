@@ -5,23 +5,28 @@ import { books } from "../data/books";
 const genres = [
   {
     name: "Science Fiction",
-    description: "Other worlds, distant galaxies, and impossible futures.",
+    description:
+      "Other worlds, distant galaxies, and impossible futures.",
   },
   {
     name: "Romance",
-    description: "Love, longing, vulnerability, and everything between.",
+    description:
+      "Love, longing, vulnerability, and everything between.",
   },
   {
     name: "Magical Realism",
-    description: "Where ordinary life quietly bends into something strange.",
+    description:
+      "Where ordinary life quietly bends into something strange.",
   },
   {
     name: "Historical Fiction",
-    description: "Stories rooted in the past, reimagined through fiction.",
+    description:
+      "Stories rooted in the past, reimagined through fiction.",
   },
   {
     name: "Poetry",
-    description: "Quiet words, fragments, feelings, and midnight thoughts.",
+    description:
+      "Quiet words, fragments, feelings, and midnight thoughts.",
   },
 ];
 
@@ -56,7 +61,7 @@ function Genres() {
               return (
                 <Link
                   key={genre.name}
-                  to={`/genre/${encodeURIComponent(genre.name)}`}
+                  to={`/genres/${encodeURIComponent(genre.name)}`}
                   className="group flex items-center justify-between gap-6 border-b border-[var(--foreground)]/10 py-8 transition-opacity duration-300 hover:opacity-60 sm:py-10"
                 >
                   <div className="flex items-start gap-6 sm:gap-10">
