@@ -8,7 +8,7 @@ export const books = [
   {
     id: "quiet-between-stars",
     title: "Quiet Between Stars",
-    author: "Elian Vale",
+    author: "Elara James",
     genre: "Science Fiction",
     cover: quietBetweenStars,
 
@@ -37,7 +37,7 @@ export const books = [
   {
     id: "things-we-never-said",
     title: "Things We Never Said",
-    author: "Mara Ellis",
+    author: "Elara James",
     genre: "Romance",
     cover: thingsWeNeverSaid,
 
@@ -66,7 +66,7 @@ export const books = [
   {
     id: "map-of-somewhere",
     title: "A Map of Somewhere",
-    author: "Iris Rowan",
+    author: "Elara James",
     genre: "Magical Realism",
     cover: mapOfSomewhere,
 
@@ -95,7 +95,7 @@ export const books = [
   {
     id: "the-last-sunday",
     title: "The Last Sunday",
-    author: "Thomas Avery",
+    author: "Elara James",
     genre: "Historical Fiction",
     cover: lastSunday,
 
@@ -124,7 +124,7 @@ export const books = [
   {
     id: "letters-to-the-moon",
     title: "Letters to the Moon",
-    author: "Noa Celeste",
+    author: "Elara James",
     genre: "Poetry",
     cover: lettersToTheMoon,
 
