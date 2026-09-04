@@ -1,5 +1,6 @@
-import { ArrowUpRight } from "lucide-react";
+import { ArrowLeft, ArrowUpRight } from "lucide-react";
 import { Link } from "react-router-dom";
+
 import { books } from "../data/books";
 
 const genres = [
@@ -35,6 +36,22 @@ function Genres() {
     <main className="min-h-screen bg-[var(--background)] text-[var(--foreground)]">
       <section className="px-6 pb-24 pt-32 sm:px-10 sm:pb-32 sm:pt-40">
         <div className="mx-auto max-w-6xl">
+
+          {/* BACK TO EDITOR'S PICKS */}
+          <Link
+            to="/#editors-picks"
+            className="group mb-16 inline-flex items-center gap-2 text-[10px] uppercase tracking-[0.25em] text-[var(--muted)] transition-colors hover:text-[var(--foreground)] sm:mb-20"
+          >
+            <ArrowLeft
+              size={14}
+              strokeWidth={1.3}
+              className="transition-transform duration-300 group-hover:-translate-x-1"
+            />
+
+            Back to Editor's Picks
+          </Link>
+
+          {/* HEADER */}
           <div className="max-w-3xl">
             <span className="text-[10px] font-medium uppercase tracking-[0.35em] text-[var(--muted)]">
               Browse by genre
@@ -52,6 +69,7 @@ function Genres() {
             </p>
           </div>
 
+          {/* GENRES */}
           <div className="mt-24 border-t border-[var(--foreground)]/10">
             {genres.map((genre, index) => {
               const genreBooks = books.filter(
@@ -65,10 +83,13 @@ function Genres() {
                   className="group flex items-center justify-between gap-6 border-b border-[var(--foreground)]/10 py-8 transition-opacity duration-300 hover:opacity-60 sm:py-10"
                 >
                   <div className="flex items-start gap-6 sm:gap-10">
+
+                    {/* NUMBER */}
                     <span className="pt-2 text-[9px] uppercase tracking-[0.25em] text-[var(--muted)]">
                       {String(index + 1).padStart(2, "0")}
                     </span>
 
+                    {/* GENRE INFO */}
                     <div>
                       <h2 className="text-2xl font-light tracking-[-0.025em] sm:text-4xl">
                         {genre.name}
@@ -80,6 +101,7 @@ function Genres() {
                     </div>
                   </div>
 
+                  {/* COUNT + ARROW */}
                   <div className="flex shrink-0 items-center gap-3 text-[9px] uppercase tracking-[0.25em] text-[var(--muted)]">
                     <span>
                       {genreBooks.length}{" "}
@@ -96,6 +118,7 @@ function Genres() {
               );
             })}
           </div>
+
         </div>
       </section>
     </main>

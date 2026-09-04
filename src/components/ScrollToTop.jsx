@@ -24,13 +24,31 @@ function ScrollToTop() {
       return;
     }
 
+    // Returning to a specific section using a URL hash
+    if (location.hash) {
+      const section = document.getElementById(
+        location.hash.replace("#", "")
+      );
+
+      if (section) {
+        requestAnimationFrame(() => {
+          section.scrollIntoView({
+            behavior: "smooth",
+            block: "start",
+          });
+        });
+
+        return;
+      }
+    }
+
     // Normal page navigation
     window.scrollTo({
       top: 0,
       left: 0,
       behavior: "instant",
     });
-  }, [location.pathname, location.state]);
+  }, [location.pathname, location.hash, location.state]);
 
   return null;
 }
