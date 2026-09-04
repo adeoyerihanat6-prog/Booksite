@@ -44,7 +44,10 @@ function Navbar({ theme, setTheme }) {
       className="fixed left-1/2 top-4 z-50 flex w-[calc(100%-2rem)] max-w-6xl -translate-x-1/2 items-center justify-between rounded-full border border-[var(--border)] bg-[color:var(--surface)]/80 px-5 py-3 shadow-lg backdrop-blur-xl md:px-7"
     >
       {/* Brand */}
-      <Link to="/">
+      <Link
+        to="/"
+        onClick={() => setMenuOpen(false)}
+      >
         <span className="text-lg font-semibold tracking-tight text-[var(--foreground)] transition-opacity duration-200 hover:opacity-70">
           Booksite
         </span>
@@ -63,7 +66,14 @@ function Navbar({ theme, setTheme }) {
           to="/genres"
           className="text-sm text-[var(--muted)] transition-colors duration-200 hover:text-[var(--foreground)]"
         >
-          Genres
+          Library
+        </Link>
+
+        <Link
+          to="/saved"
+          className="text-sm text-[var(--muted)] transition-colors duration-200 hover:text-[var(--foreground)]"
+        >
+          Saved
         </Link>
 
         <Link
@@ -172,31 +182,37 @@ function Navbar({ theme, setTheme }) {
             className="absolute left-0 right-0 top-[calc(100%+0.5rem)] rounded-3xl border border-[var(--border)] bg-[color:var(--surface)]/95 p-4 shadow-xl backdrop-blur-xl md:hidden"
           >
             <div className="flex flex-col gap-1">
+              {/* Discover */}
               <Link
                 to="/"
-                onClick={() =>
-                  setMenuOpen(false)
-                }
+                onClick={() => setMenuOpen(false)}
                 className="rounded-2xl px-4 py-3 text-sm text-[var(--muted)] transition-colors hover:bg-[var(--foreground)]/10 hover:text-[var(--foreground)]"
               >
                 Discover
               </Link>
 
+              {/* Library */}
               <Link
                 to="/genres"
-                onClick={() =>
-                  setMenuOpen(false)
-                }
+                onClick={() => setMenuOpen(false)}
                 className="rounded-2xl px-4 py-3 text-sm text-[var(--muted)] transition-colors hover:bg-[var(--foreground)]/10 hover:text-[var(--foreground)]"
               >
-                Genres
+                Library
               </Link>
 
+              {/* Saved */}
+              <Link
+                to="/saved"
+                onClick={() => setMenuOpen(false)}
+                className="rounded-2xl px-4 py-3 text-sm text-[var(--muted)] transition-colors hover:bg-[var(--foreground)]/10 hover:text-[var(--foreground)]"
+              >
+                Saved
+              </Link>
+
+              {/* About */}
               <Link
                 to="/about"
-                onClick={() =>
-                  setMenuOpen(false)
-                }
+                onClick={() => setMenuOpen(false)}
                 className="rounded-2xl px-4 py-3 text-sm text-[var(--muted)] transition-colors hover:bg-[var(--foreground)]/10 hover:text-[var(--foreground)]"
               >
                 About
