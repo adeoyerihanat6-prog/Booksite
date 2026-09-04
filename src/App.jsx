@@ -44,17 +44,7 @@ function App() {
           path="/"
           element={<Home />}
         />
-        {/* Discover */}
-        <Route
-          path="/discover"
-          element={
-            <div className="px-6 py-32">
-              <h1 className="text-5xl font-light">
-                Discover
-              </h1>
-            </div>
-        }
-        />
+       
         {/* Genres */}
 
         <Route
