@@ -15,6 +15,7 @@ import BookDetails from "./pages/BookDetails";
 
 import Reader from "./pages/Reader";
 
+
 function App() {
   const [theme, setTheme] = useState("dark");
 
@@ -36,20 +37,30 @@ function App() {
 
       <Routes>
         {/* Home */}
-
+        
         <Route
           path="/"
           element={<Home />}
         />
-
-        {/* Genre */}
-
+        {/* Discover */}
         <Route
-          path="/genre"
+          path="/discover"
           element={
             <div className="px-6 py-32">
               <h1 className="text-5xl font-light">
-                Genre
+                Discover
+              </h1>
+            </div>
+        }
+        />
+        {/* Genres */}
+
+        <Route
+          path="/genres"
+          element={
+            <div className="px-6 py-32">
+              <h1 className="text-5xl font-light">
+                Genres
               </h1>
             </div>
           }

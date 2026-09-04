@@ -173,7 +173,7 @@ function Navbar({ theme, setTheme }) {
           >
             <div className="flex flex-col gap-1">
               <Link
-                to="/"
+                to="/discover"
                 onClick={() =>
                   setMenuOpen(false)
                 }
