@@ -3,7 +3,7 @@ import { ArrowRight, BookOpen } from "lucide-react";
 import { Link } from "react-router-dom";
 
 import { books } from "../data/books";
-import { bookContent } from "../data/BookContent";
+import { bookContent } from "../data/bookContent";
 
 function ContinueReading() {
   const [readingBooks, setReadingBooks] = useState([]);
