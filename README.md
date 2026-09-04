@@ -1,129 +1,294 @@
+# Booksite
 
-Booksite 📚
+A modern, editorial-style reading experience built for people who love discovering good stories.
 
-A modern, cozy digital library experience designed for people who genuinely love books.
+Booksite is a frontend reading platform where readers can explore books by genre and mood, save books for later, and read directly in the browser with persistent reading progress.
 
-Booksite is a frontend project built around the feeling of late-night reading, quiet libraries, and discovering your next favorite book. The goal was to create something that feels editorial and immersive rather than like a typical book catalog.
+## Live Demo
 
-«Status: In development — deployment coming soon.»
+https://booksite-rihannah.vercel.app/
 
-✨ Features
+## Overview
 
-- 🌙 Dark mode by default with a warm, soft dark theme
-- ☀️ Light mode with a warm cream palette
-- 📚 Curated book collections and featured titles
-- 🎞️ Smooth animations and transitions
-- 🖱️ Interactive, scroll-based experiences
-- 📱 Responsive design for desktop and mobile
-- 🧭 Client-side routing for different sections of the site
-- 🎨 Minimal editorial-inspired visual design
-- 📖 Book-focused UI with an emphasis on readability
+Booksite was designed around a simple idea:
 
-🛠️ Built With
+> Finding a good book should feel as enjoyable as reading one.
 
-- React — UI development
-- Vite — Development and build tooling
-- Tailwind CSS — Styling
-- Framer Motion — Animations and interactions
-- Swiper — Interactive sliders and galleries
-- Lucide React — Interface icons
-- React Router — Client-side routing
+Instead of overwhelming readers with a large catalogue, Booksite focuses on a small curated collection presented through a calm, immersive interface.
 
-🎨 Design Direction
+Readers can:
 
-The visual identity was intentionally kept subtle.
+- Discover featured books
+- Browse books by genre
+- Explore books based on mood
+- View detailed book information
+- Save books for later
+- Read books directly in the browser
+- Track reading progress
+- Continue reading from where they stopped
+- Switch between dark and light themes
 
-Instead of relying on bright accent colors, Booksite uses warm neutrals inspired by books, paper, and dimly lit reading spaces.
+## Features
 
-Dark Theme
+### Discover
 
-- Warm charcoal background
-- Soft cream typography
-- Muted neutral accents
-- Subtle borders and surfaces
+The homepage introduces readers to the collection through:
 
-Light Theme
+- Featured books
+- Mood-based discovery
+- Continue Reading
+- Editorial-style book presentation
 
-- Warm paper-like background
-- Dark editorial typography
-- Soft neutral surfaces
-- Minimal contrast accents
+### Library
 
-The overall direction is:
+Browse the available collection and filter books by genre.
 
-Late-night reading × Cozy library × Modern editorial
+Current genres include:
 
-📂 Project Structure
+- Science Fiction
+- Romance
+- Magical Realism
+- Historical Fiction
+- Poetry
+
+### Browse by Mood
+
+Books can also be discovered based on how the reader feels.
+
+Examples include:
+
+- Hopeful
+- Dreamy
+- Emotional
+- Bittersweet
+- Strange
+- Nostalgic
+- Reflective
+- Soft
+
+### Saved Books
+
+Readers can save books they want to return to later.
+
+Saved books persist using browser local storage, so they remain available after refreshing the page.
+
+### Online Reader
+
+Each book has its own reading experience with:
+
+- Chapter navigation
+- Reading progress
+- Previous and next chapter controls
+- Reading settings
+- Persistent scroll position
+- Automatic scroll-to-top when changing chapters
+
+### Continue Reading
+
+Booksite remembers reading progress locally.
+
+When a reader leaves a book and returns to the Discover page, books they've started appear in the Continue Reading section so they can pick up where they left off.
+
+### Theme Switching
+
+Booksite supports both:
+
+- Dark mode
+- Light mode
+
+The visual system uses warm charcoal tones for dark mode and warm cream tones for light mode.
+
+### Responsive Design
+
+The interface is designed to work across:
+
+- Desktop
+- Tablet
+- Mobile
+
+The reading experience is also optimized for smaller screens.
+
+## Tech Stack
+
+### Frontend
+
+- React
+- Vite
+- Tailwind CSS
+- React Router
+- Framer Motion
+- Lucide React
+
+### Storage
+
+- Browser Local Storage
+
+Local storage is currently used for:
+
+- Saved books
+- Reading progress
+- Reader state
+
+### Deployment
+
+- Vercel
+
+## Project Structure
 
 src/
 ├── assets/
+│   └── books/
+│
 ├── components/
+│   ├── Navbar.jsx
+│   ├── Footer.jsx
+│   ├── Hero.jsx
+│   ├── MoodLibrary.jsx
+│   ├── EditorsPicks.jsx
+│   ├── ContinueReading.jsx
+│   └── ...
+│
 ├── data/
+│   ├── books.js
+│   └── bookContent.js
+│
+├── hooks/
+│   └── useReadingProgress.js
+│
 ├── layouts/
+│   └── MainLayout.jsx
+│
 ├── pages/
+│   ├── Home.jsx
+│   ├── Genres.jsx
+│   ├── GenreResults.jsx
+│   ├── MoodResults.jsx
+│   ├── BookDetails.jsx
+│   ├── Reader.jsx
+│   ├── SavedBooks.jsx
+│   ├── About.jsx
+│   └── NotFound.jsx
+│
 ├── App.jsx
 ├── index.css
 └── main.jsx
 
-The project is organized to keep reusable UI components, page-level views, book data, assets, and layouts separated as the application grows.
+## Getting Started
 
-🚀 Getting Started
+### Clone the repository
 
-Clone the repository:
+git clone https://github.com/adeoyerihanat6-prog/Booksite.git
 
-git clone <your-repository-url>
+### Navigate into the project
 
-Navigate into the project:
+cd Booksite
 
-cd booksite
-
-Install dependencies:
+### Install dependencies
 
 npm install
 
-Start the development server:
+### Start the development server
 
 npm run dev
 
-Then open the local development URL provided by Vite.
+The app will be available at the local development URL provided by Vite.
 
-🧠 What I Practiced
+### Build for production
 
-This project gave me the opportunity to work more deeply with:
+npm run build
 
-- Component-based React architecture
+## Design Direction
+
+Booksite intentionally avoids the typical bright, heavily animated book-library aesthetic.
+
+The interface is inspired by:
+
+- Late-night reading
+- Quiet libraries
+- Editorial websites
+- Printed books
+- Warm paper
+- Minimal interfaces
+
+The dark theme uses a warm near-black rather than pure black, while the light theme uses a warm cream instead of pure white.
+
+The goal is to make the interface feel calm enough that the content remains the focus.
+
+## Current Book Collection
+
+### Quiet Between Stars
+
+A science-fiction story about distance, memory, and finding home somewhere beyond the stars.
+
+### Things We Never Said
+
+A contemporary romance about old friendships, unfinished conversations, and the things people struggle to say.
+
+### A Map of Somewhere
+
+A magical-realism story where a mysterious map leads its owner through forgotten memories.
+
+### The Last Sunday
+
+A historical-fiction story set in a Nigerian town, exploring family, expectations, and the choices that shape generations.
+
+### Letters to the Moon
+
+An epistolary story about old letters, unfinished dreams, and choosing what to carry into the future.
+
+## What I Learned
+
+Building Booksite helped me work through several areas of frontend development, including:
+
+- React component architecture
+- Client-side routing
+- Persistent state with local storage
+- Building a browser-based reading experience
+- Managing reading progress
 - Responsive layouts
-- Theme switching
-- Framer Motion animations
-- Scroll-driven interactions
-- Interactive galleries
-- React Router
-- Tailwind CSS
-- Building a consistent design system
-- Creating UI around a specific visual identity
+- Theme systems
+- Accessibility considerations
+- Animation with Framer Motion
+- Production builds with Vite
+- Deploying React applications with Vercel
 
-🔮 Future Improvements
+One of the biggest lessons from the project was that building a feature isn't just about making it work once.
 
-Some ideas I may explore as the project develops:
+It also has to survive:
 
-- [ ] Deploy the application
-- [ ] Add search and filtering
-- [ ] Add individual book detail pages
-- [ ] Add favorites / reading lists
-- [ ] Connect the interface to a book API
-- [ ] Add more interactive reading-related experiences
-- [ ] Improve accessibility across the application
+- Refreshes
+- Navigation
+- Different screen sizes
+- Empty states
+- Invalid routes
+- Production builds
+- Real user interactions
 
-📸 Preview
+## Future Improvements
 
-Screenshots and a live demo will be added after deployment.
+Possible future improvements include:
 
-👩🏽‍💻 About the Project
+- User accounts
+- Cloud-synced reading progress
+- A larger book catalogue
+- Book search
+- Book recommendations
+- Reading history
+- Reviews and ratings
+- Bookmarks within chapters
+- More advanced reader settings
+- Backend-powered content management
 
-Booksite is a project I built because I wanted to create something around something I genuinely enjoy — books.
+## Author
 
-Rather than building another project purely because it was technically useful, I wanted to experiment with making development feel creative and enjoyable while still challenging myself technically.
+Built by **Rihannah**.
 
----
+Full-stack web developer learning, building, breaking things, and figuring them out along the way.
 
-Built with React, curiosity, and a love for books. 📚
+GitHub:
+
+https://github.com/adeoyerihanat6-prog
+
+## License
+
+This project was created as a personal learning and portfolio project.
