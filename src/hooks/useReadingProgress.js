@@ -1,4 +1,9 @@
-import { useCallback, useEffect, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 
 const STORAGE_KEY = "readingProgress";
 
@@ -20,7 +25,10 @@ function useReadingProgress(bookId) {
   ----------------------------- */
 
   useEffect(() => {
-    if (!bookId) return;
+    if (!bookId) {
+      setProgress(null);
+      return;
+    }
 
     const allProgress = getAllProgress();
 
@@ -75,11 +83,10 @@ function useReadingProgress(bookId) {
   }, [bookId]);
 
   /* -----------------------------
-     BOOK PROGRESS
+     DERIVED PROGRESS
   ----------------------------- */
 
-  const chapterIndex =
-    progress?.chapterIndex ?? 0;
+  const chapterIndex = progress?.chapterIndex ?? 0;
 
   const chapterProgress =
     progress?.chapterProgress ?? 0;
@@ -87,36 +94,50 @@ function useReadingProgress(bookId) {
   const completedChapters =
     progress?.completedChapters ?? [];
 
-  const getBookProgress = (totalChapters) => {
-    if (!totalChapters) return 0;
+  const getBookProgress = useCallback(
+    (totalChapters) => {
+      if (!totalChapters) return 0;
 
-    const completedChapterCount =
-      completedChapters.length;
+      const completedChapterCount =
+        completedChapters.length;
 
-    const currentChapterProgress =
-      chapterProgress / 100;
+      const currentChapterProgress =
+        chapterProgress / 100;
 
-    const calculatedProgress =
-      ((completedChapterCount +
-        currentChapterProgress) /
-        totalChapters) *
-      100;
+      const calculatedProgress =
+        ((completedChapterCount +
+          currentChapterProgress) /
+          totalChapters) *
+        100;
 
-    return Math.min(
-      100,
-      Math.max(0, calculatedProgress)
-    );
-  };
+      return Math.min(
+        100,
+        Math.max(0, calculatedProgress)
+      );
+    },
+    [completedChapters, chapterProgress]
+  );
 
-  return {
-    progress,
-    chapterIndex,
-    chapterProgress,
-    completedChapters,
-    getBookProgress,
-    saveProgress,
-    clearProgress,
-  };
+  return useMemo(
+    () => ({
+      progress,
+      chapterIndex,
+      chapterProgress,
+      completedChapters,
+      getBookProgress,
+      saveProgress,
+      clearProgress,
+    }),
+    [
+      progress,
+      chapterIndex,
+      chapterProgress,
+      completedChapters,
+      getBookProgress,
+      saveProgress,
+      clearProgress,
+    ]
+  );
 }
 
 export default useReadingProgress;

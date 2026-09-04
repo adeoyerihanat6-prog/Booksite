@@ -11,8 +11,8 @@ import {
 } from "lucide-react";
 
 import {
-  motion,
   AnimatePresence,
+  motion,
 } from "framer-motion";
 
 import {
@@ -21,8 +21,10 @@ import {
 } from "react-router-dom";
 
 import {
+  useCallback,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 
@@ -39,7 +41,18 @@ function Reader() {
 
   const content = bookContent[id];
 
+  const {
+    progress: savedProgress,
+    chapterIndex: savedChapterIndex,
+    chapterProgress: savedChapterProgress,
+    completedChapters,
+    saveProgress,
+  } = useReadingProgress(id);
+
   const [chapterIndex, setChapterIndex] =
+    useState(0);
+
+  const [progress, setProgress] =
     useState(0);
 
   const [menuOpen, setMenuOpen] =
@@ -48,115 +61,218 @@ function Reader() {
   const [settingsOpen, setSettingsOpen] =
     useState(false);
 
-  const [saved, setSaved] = useState(false);
-
-  const [progress, setProgress] = useState(0);
+  const [saved, setSaved] =
+    useState(false);
 
   const [fontSize, setFontSize] = useState(() => {
-    const settings = JSON.parse(
-      localStorage.getItem("readerSettings") ||
-        "{}"
-    );
+    try {
+      const settings = JSON.parse(
+        localStorage.getItem(
+          "readerSettings"
+        ) || "{}"
+      );
 
-    return settings.fontSize || 18;
+      return settings.fontSize || 18;
+    } catch {
+      return 18;
+    }
   });
 
   const [readingWidth, setReadingWidth] =
     useState(() => {
-      const settings = JSON.parse(
-        localStorage.getItem("readerSettings") ||
-          "{}"
-      );
+      try {
+        const settings = JSON.parse(
+          localStorage.getItem(
+            "readerSettings"
+          ) || "{}"
+        );
 
-      return settings.readingWidth || "medium";
+        return settings.readingWidth || "medium";
+      } catch {
+        return "medium";
+      }
     });
 
-  const [lineHeight, setLineHeight] = useState(
-    () => {
-      const settings = JSON.parse(
-        localStorage.getItem("readerSettings") ||
-          "{}"
-      );
+  const [lineHeight, setLineHeight] =
+    useState(() => {
+      try {
+        const settings = JSON.parse(
+          localStorage.getItem(
+            "readerSettings"
+          ) || "{}"
+        );
 
-      return settings.lineHeight || 2;
-    }
-  );
+        return settings.lineHeight || 2;
+      } catch {
+        return 2;
+      }
+    });
 
-  const {
-    progress: savedProgress,
-    chapterIndex: savedChapterIndex,
-    chapterProgress,
-    completedChapters,
-    getBookProgress,
-    saveProgress,
-  } = useReadingProgress(id);
+  const isRestoringRef = useRef(false);
+  const saveTimeoutRef = useRef(null);
+  const latestProgressRef = useRef(null);
 
   const chapter =
     content?.chapters[chapterIndex];
 
   /* -----------------------------
-     RESTORE READING PROGRESS
+     RESTORE SAVED CHAPTER
   ----------------------------- */
 
   useEffect(() => {
-    if (!savedProgress) return;
+    if (!content || !savedProgress) return;
 
-    setChapterIndex(savedChapterIndex);
+    const safeChapterIndex = Math.min(
+      savedChapterIndex,
+      content.chapters.length - 1
+    );
 
-    requestAnimationFrame(() => {
-      window.scrollTo({
-        top: savedProgress.scrollPosition || 0,
-        behavior: "instant",
-      });
+    setChapterIndex((current) => {
+      if (current === safeChapterIndex) {
+        return current;
+      }
+
+      return safeChapterIndex;
     });
   }, [
+    content,
     savedProgress,
     savedChapterIndex,
   ]);
 
   /* -----------------------------
-     TRACK READING POSITION
+     RESTORE SAVED SCROLL POSITION
   ----------------------------- */
 
   useEffect(() => {
-    if (!id || !content) return;
+    if (!content || !savedProgress) return;
+
+    const safeChapterIndex = Math.min(
+      savedChapterIndex,
+      content.chapters.length - 1
+    );
+
+    if (chapterIndex !== safeChapterIndex) {
+      return;
+    }
+
+    isRestoringRef.current = true;
+
+    const frame = requestAnimationFrame(() => {
+      window.scrollTo({
+        top: savedProgress.scrollPosition || 0,
+        left: 0,
+        behavior: "instant",
+      });
+
+      requestAnimationFrame(() => {
+        isRestoringRef.current = false;
+      });
+    });
+
+    return () => {
+      cancelAnimationFrame(frame);
+    };
+  }, [
+    content,
+    chapterIndex,
+    savedProgress?.scrollPosition,
+    savedChapterIndex,
+  ]);
+
+  /* -----------------------------
+     CALCULATE PROGRESS
+  ----------------------------- */
+
+  const calculateProgress = useCallback(
+    (currentChapter, chapterScrollProgress) => {
+      if (!content) return 0;
+
+      const totalChapters =
+        content.chapters.length;
+
+      const value =
+        ((currentChapter +
+          chapterScrollProgress / 100) /
+          totalChapters) *
+        100;
+
+      return Math.min(
+        100,
+        Math.max(0, value)
+      );
+    },
+    [content]
+  );
+
+  /* -----------------------------
+     TRACK SCROLL
+  ----------------------------- */
+
+  useEffect(() => {
+    if (!content || !chapter) return;
 
     const handleScroll = () => {
+      if (isRestoringRef.current) {
+        return;
+      }
+
       const scrollTop = window.scrollY;
 
       const documentHeight =
         document.documentElement.scrollHeight -
         window.innerHeight;
 
-      const currentChapterProgress =
+      const chapterProgress =
         documentHeight > 0
           ? (scrollTop / documentHeight) * 100
           : 0;
 
-      const safeChapterProgress = Math.min(
-        100,
-        Math.max(0, currentChapterProgress)
-      );
-
-      const bookProgress =
-        ((chapterIndex +
-          safeChapterProgress / 100) /
-          content.chapters.length) *
-        100;
-
-      setProgress(
+      const safeChapterProgress =
         Math.min(
           100,
-          Math.max(0, bookProgress)
-        )
-      );
+          Math.max(
+            0,
+            chapterProgress
+          )
+        );
 
-      saveProgress({
+      const bookProgress =
+        calculateProgress(
+          chapterIndex,
+          safeChapterProgress
+        );
+
+      setProgress(bookProgress);
+
+      latestProgressRef.current = {
         chapterIndex,
         scrollPosition: scrollTop,
         chapterProgress:
           safeChapterProgress,
-      });
+      };
+
+      /*
+       * Don't write to localStorage on
+       * every single scroll event.
+       */
+
+      if (saveTimeoutRef.current) {
+        clearTimeout(
+          saveTimeoutRef.current
+        );
+      }
+
+      saveTimeoutRef.current =
+        setTimeout(() => {
+          if (
+            latestProgressRef.current
+          ) {
+            saveProgress(
+              latestProgressRef.current
+            );
+          }
+        }, 250);
     };
 
     window.addEventListener(
@@ -167,20 +283,68 @@ function Reader() {
       }
     );
 
-    handleScroll();
+    /*
+     * Don't immediately call handleScroll()
+     * here because the restoration effect
+     * needs to happen first.
+     */
 
     return () => {
       window.removeEventListener(
         "scroll",
         handleScroll
       );
+
+      if (saveTimeoutRef.current) {
+        clearTimeout(
+          saveTimeoutRef.current
+        );
+      }
     };
   }, [
-    chapterIndex,
-    id,
     content,
+    chapter,
+    chapterIndex,
+    calculateProgress,
     saveProgress,
   ]);
+
+  /* -----------------------------
+     INITIAL PROGRESS
+  ----------------------------- */
+
+  useEffect(() => {
+    if (!content) return;
+
+    const initialProgress =
+      calculateProgress(
+        chapterIndex,
+        savedChapterProgress
+      );
+
+    setProgress(initialProgress);
+  }, [
+    content,
+    chapterIndex,
+    savedChapterProgress,
+    calculateProgress,
+  ]);
+
+  /* -----------------------------
+     SAVE ON UNMOUNT
+  ----------------------------- */
+
+  useEffect(() => {
+    return () => {
+      if (
+        latestProgressRef.current
+      ) {
+        saveProgress(
+          latestProgressRef.current
+        );
+      }
+    };
+  }, [saveProgress]);
 
   /* -----------------------------
      SAVE READER SETTINGS
@@ -208,12 +372,19 @@ function Reader() {
   useEffect(() => {
     if (!id) return;
 
-    const savedBooks = JSON.parse(
-      localStorage.getItem("savedBooks") ||
-        "[]"
-    );
+    try {
+      const savedBooks = JSON.parse(
+        localStorage.getItem(
+          "savedBooks"
+        ) || "[]"
+      );
 
-    setSaved(savedBooks.includes(id));
+      setSaved(
+        savedBooks.includes(id)
+      );
+    } catch {
+      setSaved(false);
+    }
   }, [id]);
 
   /* -----------------------------
@@ -221,10 +392,17 @@ function Reader() {
   ----------------------------- */
 
   const handleSave = () => {
-    const savedBooks = JSON.parse(
-      localStorage.getItem("savedBooks") ||
-        "[]"
-    );
+    let savedBooks = [];
+
+    try {
+      savedBooks = JSON.parse(
+        localStorage.getItem(
+          "savedBooks"
+        ) || "[]"
+      );
+    } catch {
+      savedBooks = [];
+    }
 
     if (saved) {
       const updatedBooks =
@@ -258,15 +436,76 @@ function Reader() {
   ----------------------------- */
 
   const goToChapter = (index) => {
-    if (!content?.chapters[index]) return;
+    if (!content?.chapters[index]) {
+      return;
+    }
+
+    if (index === chapterIndex) {
+      return;
+    }
+
+    /*
+     * Stop the current scroll-save timer.
+     */
+
+    if (saveTimeoutRef.current) {
+      clearTimeout(
+        saveTimeoutRef.current
+      );
+    }
+
+    /*
+     * Prevent the scroll listener from
+     * treating the chapter transition
+     * as reading progress.
+     */
+
+    isRestoringRef.current = true;
+
+    /*
+     * Save the new chapter at position 0.
+     */
+
+    const newProgress =
+      calculateProgress(
+        index,
+        0
+      );
 
     setChapterIndex(index);
+    setProgress(newProgress);
     setMenuOpen(false);
 
+    latestProgressRef.current = {
+      chapterIndex: index,
+      scrollPosition: 0,
+      chapterProgress: 0,
+    };
+
+    saveProgress({
+      chapterIndex: index,
+      scrollPosition: 0,
+      chapterProgress: 0,
+    });
+
+    /*
+     * Scroll to the top immediately.
+     */
+
+    window.scrollTo({
+      top: 0,
+      left: 0,
+      behavior: "instant",
+    });
+
+    /*
+     * Let the browser finish the chapter
+     * transition before enabling scroll tracking.
+     */
+
     requestAnimationFrame(() => {
-      window.scrollTo({
-        top: 0,
-        behavior: "smooth",
+      requestAnimationFrame(() => {
+        isRestoringRef.current = false;
       });
     });
   };
@@ -276,13 +515,17 @@ function Reader() {
       chapterIndex <
       content.chapters.length - 1
     ) {
-      goToChapter(chapterIndex + 1);
+      goToChapter(
+        chapterIndex + 1
+      );
     }
   };
 
   const previousChapter = () => {
     if (chapterIndex > 0) {
-      goToChapter(chapterIndex - 1);
+      goToChapter(
+        chapterIndex - 1
+      );
     }
   };
 
@@ -290,48 +533,37 @@ function Reader() {
      CHAPTER COMPLETION
   ----------------------------- */
 
-  const isChapterCompleted = (index) => {
-    return completedChapters.includes(index);
-  };
+  const isChapterCompleted = (index) =>
+    completedChapters.includes(index);
 
   const markChapterComplete = () => {
     if (
-      isChapterCompleted(chapterIndex)
+      isChapterCompleted(
+        chapterIndex
+      )
     ) {
       return;
     }
+
+    const updatedCompletedChapters = [
+      ...completedChapters,
+      chapterIndex,
+    ];
 
     saveProgress({
       chapterIndex,
       scrollPosition: window.scrollY,
       chapterProgress: 100,
-      completedChapters: [
-        ...completedChapters,
-        chapterIndex,
-      ],
+      completedChapters:
+        updatedCompletedChapters,
     });
+
+    setProgress(
+      ((chapterIndex + 1) /
+        content.chapters.length) *
+        100
+    );
   };
-
-  /* -----------------------------
-     BOOK PROGRESS
-  ----------------------------- */
-
-  useEffect(() => {
-    if (!content) return;
-
-    const calculatedProgress =
-      getBookProgress(
-        content.chapters.length
-      );
-
-    setProgress(calculatedProgress);
-  }, [
-    chapterProgress,
-    completedChapters,
-    chapterIndex,
-    content,
-    getBookProgress,
-  ]);
 
   /* -----------------------------
      PROGRESS LABEL
@@ -396,9 +628,7 @@ function Reader() {
 
   return (
     <main className="min-h-screen bg-[var(--background)] text-[var(--foreground)]">
-      {/* -----------------------------
-          READING PROGRESS
-      ----------------------------- */}
+      {/* READING PROGRESS */}
 
       <div className="fixed left-0 top-0 z-[70] h-[2px] w-full bg-[var(--foreground)]/[0.06]">
         <motion.div
@@ -407,14 +637,12 @@ function Reader() {
             width: `${progress}%`,
           }}
           transition={{
-            duration: 0.15,
+            duration: 0.12,
           }}
         />
       </div>
 
-      {/* -----------------------------
-          READER HEADER
-      ----------------------------- */}
+      {/* READER HEADER */}
 
       <header className="sticky top-0 z-40 border-b border-[var(--foreground)]/[0.08] bg-[var(--background)]/90 backdrop-blur-xl">
         <div className="mx-auto flex h-20 max-w-5xl items-center justify-between px-6 sm:px-10">
@@ -498,9 +726,7 @@ function Reader() {
         </div>
       </header>
 
-      {/* -----------------------------
-          READING AREA
-      ----------------------------- */}
+      {/* READING AREA */}
 
       <section className="px-6 pb-28 pt-20 sm:px-10 sm:pb-40 sm:pt-28">
         <AnimatePresence mode="wait">
@@ -519,8 +745,13 @@ function Reader() {
               y: -15,
             }}
             transition={{
-              duration: 0.55,
-              ease: [0.22, 1, 0.36, 1],
+              duration: 0.45,
+              ease: [
+                0.22,
+                1,
+                0.36,
+                1,
+              ],
             }}
             className={`mx-auto w-full ${widthClasses[readingWidth]}`}
           >
@@ -614,9 +845,7 @@ function Reader() {
         </AnimatePresence>
       </section>
 
-      {/* -----------------------------
-          CHAPTER NAVIGATION
-      ----------------------------- */}
+      {/* CHAPTER NAVIGATION */}
 
       <section className="border-t border-[var(--foreground)]/[0.08] px-6 py-12 sm:px-10 sm:py-16">
         <div
@@ -625,7 +854,9 @@ function Reader() {
           <div className="flex items-center justify-between gap-6">
             <button
               type="button"
-              onClick={previousChapter}
+              onClick={
+                previousChapter
+              }
               disabled={chapterIndex === 0}
               className="group flex items-center gap-3 text-left text-[9px] uppercase tracking-[0.25em] text-[var(--muted)] transition-colors hover:text-[var(--foreground)] disabled:pointer-events-none disabled:opacity-20"
             >
@@ -674,9 +905,7 @@ function Reader() {
         </div>
       </section>
 
-      {/* -----------------------------
-          END OF BOOK
-      ----------------------------- */}
+      {/* END OF BOOK */}
 
       {chapterIndex ===
         content.chapters.length - 1 && (
@@ -706,8 +935,9 @@ function Reader() {
             </h2>
 
             <p className="mx-auto mt-5 max-w-md text-sm font-light leading-relaxed text-[var(--muted)]">
-              Some stories end on the page. Others
-              stay with us a little longer.
+              Some stories end on the page.
+              Others stay with us a little
+              longer.
             </p>
 
             <Link
@@ -725,9 +955,7 @@ function Reader() {
         </motion.section>
       )}
 
-      {/* -----------------------------
-          CHAPTER DRAWER
-      ----------------------------- */}
+      {/* CHAPTER DRAWER */}
 
       <AnimatePresence>
         {menuOpen && (
@@ -762,7 +990,12 @@ function Reader() {
               }}
               transition={{
                 duration: 0.45,
-                ease: [0.22, 1, 0.36, 1],
+                ease: [
+                  0.22,
+                  1,
+                  0.36,
+                  1,
+                ],
               }}
               className="fixed right-0 top-0 z-[60] flex h-full w-full max-w-sm flex-col border-l border-[var(--foreground)]/10 bg-[var(--background)]"
             >
@@ -828,7 +1061,8 @@ function Reader() {
                           />
                         )}
 
-                        {chapterIndex === index &&
+                        {chapterIndex ===
+                          index &&
                           !isChapterCompleted(
                             index
                           ) && (
@@ -843,9 +1077,7 @@ function Reader() {
               <div className="border-t border-[var(--foreground)]/10 px-6 py-6">
                 <div className="flex items-center justify-between">
                   <p className="text-[9px] leading-relaxed text-[var(--muted)]">
-                    {Math.round(
-                      progress
-                    )}
+                    {Math.round(progress)}
                     % of the book
                   </p>
 
@@ -870,9 +1102,7 @@ function Reader() {
         )}
       </AnimatePresence>
 
-      {/* -----------------------------
-          READING SETTINGS
-      ----------------------------- */}
+      {/* READING SETTINGS */}
 
       <AnimatePresence>
         {settingsOpen && (
@@ -907,7 +1137,12 @@ function Reader() {
               }}
               transition={{
                 duration: 0.4,
-                ease: [0.22, 1, 0.36, 1],
+                ease: [
+                  0.22,
+                  1,
+                  0.36,
+                  1,
+                ],
               }}
               className="fixed right-0 top-0 z-[60] flex h-full w-full max-w-sm flex-col border-l border-[var(--foreground)]/10 bg-[var(--background)]"
             >
@@ -938,8 +1173,6 @@ function Reader() {
               </div>
 
               <div className="flex-1 overflow-y-auto px-6 py-8">
-                {/* FONT SIZE */}
-
                 <div className="border-b border-[var(--foreground)]/10 pb-8">
                   <div className="flex items-center justify-between">
                     <div>
@@ -994,8 +1227,6 @@ function Reader() {
                   </div>
                 </div>
 
-                {/* READING WIDTH */}
-
                 <div className="border-b border-[var(--foreground)]/10 py-8">
                   <p className="text-[9px] uppercase tracking-[0.25em] text-[var(--muted)]">
                     Reading width
@@ -1036,8 +1267,6 @@ function Reader() {
                     ))}
                   </div>
                 </div>
-
-                {/* LINE HEIGHT */}
 
                 <div className="border-b border-[var(--foreground)]/10 py-8">
                   <div className="flex items-center justify-between">
@@ -1103,8 +1332,6 @@ function Reader() {
                   </div>
                 </div>
 
-                {/* PREVIEW */}
-
                 <div className="pt-8">
                   <p className="text-[9px] uppercase tracking-[0.25em] text-[var(--muted)]">
                     Preview
@@ -1118,21 +1345,21 @@ function Reader() {
                     }}
                   >
                     <p className="font-light text-[var(--foreground)]/80">
-                      Every story deserves a quiet
-                      place to be read.
+                      Every story deserves a
+                      quiet place to be read.
                     </p>
                   </div>
                 </div>
               </div>
-
-              {/* RESET */}
 
               <div className="border-t border-[var(--foreground)]/10 px-6 py-6">
                 <button
                   type="button"
                   onClick={() => {
                     setFontSize(18);
-                    setReadingWidth("medium");
+                    setReadingWidth(
+                      "medium"
+                    );
                     setLineHeight(2);
                   }}
                   className="text-[9px] uppercase tracking-[0.25em] text-[var(--muted)] transition-colors hover:text-[var(--foreground)]"
