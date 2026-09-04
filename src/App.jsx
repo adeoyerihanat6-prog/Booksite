@@ -1,22 +1,16 @@
-
 import { useState } from "react";
-
 import { Routes, Route } from "react-router-dom";
 
 import Navbar from "./components/Navbar";
-
 import ScrollToTop from "./components/ScrollToTop";
 
 import Home from "./pages/Home";
-
 import MoodResults from "./pages/MoodResults";
-
 import BookDetails from "./pages/BookDetails";
-
 import Reader from "./pages/Reader";
 import Genres from "./pages/Genres";
+import GenreResults from "./pages/GenreResults";
 import About from "./pages/About";
-
 
 function App() {
   const [theme, setTheme] = useState("dark");
@@ -39,46 +33,41 @@ function App() {
 
       <Routes>
         {/* Home */}
-        
         <Route
           path="/"
           element={<Home />}
         />
-       
-        {/* Genres */}
 
+        {/* Genres */}
         <Route
           path="/genres"
-          element={
-            <Genres/>
-          }
+          element={<Genres />}
+        />
+
+        <Route
+          path="/genres/:genreName"
+          element={<GenreResults />}
         />
 
         {/* About */}
-
         <Route
           path="/about"
-          element={
-           <About/>
-          }
+          element={<About />}
         />
 
         {/* Mood Results */}
-
         <Route
           path="/mood/:mood"
           element={<MoodResults />}
         />
 
         {/* Book Details */}
-
         <Route
           path="/book/:id"
           element={<BookDetails />}
         />
 
         {/* Reader */}
-
         <Route
           path="/read/:id"
           element={<Reader />}
@@ -89,4 +78,3 @@ function App() {
 }
 
 export default App;
-
