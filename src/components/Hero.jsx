@@ -3,7 +3,6 @@ import {
   motion,
   useScroll,
   useTransform,
-  useMotionValue,
 } from "framer-motion";
 import { useRef, useEffect, useState } from "react";
 
@@ -59,7 +58,6 @@ const books = [
 function Hero() {
   const targetRef = useRef(null);
   const galleryRef = useRef(null);
-
   const [travelDistance, setTravelDistance] = useState(0);
 
   useEffect(() => {
@@ -91,7 +89,6 @@ function Hero() {
     offset: ["start start", "end end"],
   });
 
-  // Intro transition
   const introOpacity = useTransform(
     scrollYProgress,
     [0, 0.12],
@@ -104,7 +101,6 @@ function Hero() {
     [1, 0.96]
   );
 
-  // Horizontal gallery movement
   const x = useTransform(
     scrollYProgress,
     [0.1, 0.9],
@@ -117,9 +113,7 @@ function Hero() {
       className="relative h-[400vh] bg-[var(--background)] text-[var(--foreground)]"
     >
       <div className="sticky top-0 flex h-screen items-center overflow-hidden">
-
         {/* INTRO */}
-
         <motion.div
           style={{
             opacity: introOpacity,
@@ -153,16 +147,11 @@ function Hero() {
             className="absolute bottom-10 flex items-center gap-3 text-[10px] font-medium uppercase tracking-[0.3em] text-[var(--muted)]"
           >
             Scroll to explore
-
-            <ArrowRight
-              size={13}
-              strokeWidth={1.5}
-            />
+            <ArrowRight size={13} strokeWidth={1.5} />
           </motion.div>
         </motion.div>
 
         {/* BOOK GALLERY */}
-
         <motion.div
           ref={galleryRef}
           style={{ x }}
@@ -177,10 +166,9 @@ function Hero() {
                 stiffness: 180,
                 damping: 18,
               }}
-              className="group relative flex h-[560px] w-[290px] shrink-0 flex-col items-center justify-between sm:h-[620px] sm:w-[360px]"
+              className="group relative flex h-[520px] w-[290px] shrink-0 flex-col items-center justify-between sm:h-[570px] sm:w-[360px]"
             >
               {/* NUMBER */}
-
               <div className="flex w-full items-center justify-between border-b border-[var(--foreground)]/10 pb-4 text-[10px] uppercase tracking-[0.25em] text-[var(--muted)]">
                 <span>
                   {String(book.id).padStart(2, "0")} / 05
@@ -190,7 +178,6 @@ function Hero() {
               </div>
 
               {/* COVER */}
-
               <div className="relative flex flex-1 items-center justify-center py-10">
                 <div className="absolute h-64 w-40 rounded-full bg-black/10 blur-3xl transition-all duration-700 group-hover:scale-110 dark:bg-black/40" />
 
@@ -204,7 +191,6 @@ function Hero() {
               </div>
 
               {/* DETAILS */}
-
               <div className="w-full text-center">
                 <h2 className="text-2xl font-normal tracking-[-0.02em] sm:text-3xl">
                   {book.title}
@@ -219,7 +205,6 @@ function Hero() {
         </motion.div>
 
         {/* EDGE FADES */}
-
         <div className="pointer-events-none absolute inset-y-0 left-0 z-30 w-[10vw] bg-gradient-to-r from-[var(--background)] to-transparent" />
 
         <div className="pointer-events-none absolute inset-y-0 right-0 z-30 w-[10vw] bg-gradient-to-l from-[var(--background)] to-transparent" />
